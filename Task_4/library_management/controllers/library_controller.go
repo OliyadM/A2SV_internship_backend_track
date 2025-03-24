@@ -11,6 +11,9 @@ var library = services.Library{
 	Members: make(map[int]models.Member),
 }
 
+
+
+
 func UserInput() {
 	for {
 		fmt.Println("\nLibrary Management System")
@@ -20,7 +23,8 @@ func UserInput() {
 		fmt.Println("4. Return a book")
 		fmt.Println("5. List available books")
 		fmt.Println("6. List borrowed books by a member")
-		fmt.Println("7. Exit")
+		fmt.Println("7. reserve books for a member")
+		fmt.Println("8. Exit")
 		fmt.Print("Choose an operation: ")
 
 		var choice int
@@ -28,18 +32,20 @@ func UserInput() {
 
 		switch choice {
 		case 1:
-			addBook()
+			addbook()
 		case 2:
-			removeBook()
+			removebook()
 		case 3:
-			borrowBook()
+			borrowbook()
 		case 4:
-			returnBook()
+			returnbook()
 		case 5:
-			listAvailableBooks()
+			listavailablebooks()
 		case 6:
-			listBorrowedBooks()
+			listborrowedbooks()
 		case 7:
+			reservebook()
+		case 8:
 			fmt.Println("Exiting...")
 			return
 		default:
@@ -48,9 +54,9 @@ func UserInput() {
 	}
 }
 
-func addBook() {
+func addbook() {
 	var id int
-	var title, author string
+	var title, author, status string
 
 	fmt.Print("Enter book ID: ")
 	fmt.Scan(&id)
@@ -58,19 +64,21 @@ func addBook() {
 	fmt.Scan(&title)
 	fmt.Print("Enter book author: ")
 	fmt.Scan(&author)
+	fmt.Print("Enter book status (Available/Borrowed): ")
+	fmt.Scan(&status)
 
 	newBook := models.Book{
 		ID:     id,
 		Title:  title,
 		Author: author,
-		Status: "Available",
+		Status: status,
 	}
 
 	library.AddBook(newBook)
 	fmt.Println("Book added successfully!")
 }
 
-func removeBook() {
+func removebook() {
 	var id int
 	fmt.Print("Enter book ID to remove: ")
 	fmt.Scan(&id)
@@ -83,7 +91,7 @@ func removeBook() {
 	}
 }
 
-func borrowBook() {
+func borrowbook() {
 	var bookID, memberID int
 	fmt.Print("Enter book ID: ")
 	fmt.Scan(&bookID)
@@ -98,7 +106,7 @@ func borrowBook() {
 	}
 }
 
-func returnBook() {
+func returnbook() {
 	var bookID, memberID int
 	fmt.Print("Enter book ID: ")
 	fmt.Scan(&bookID)
@@ -113,7 +121,7 @@ func returnBook() {
 	}
 }
 
-func listAvailableBooks() {
+func listavailablebooks() {
 	books := library.ListAvailableBooks()
 	if len(books) == 0 {
 		fmt.Println("No available books.")
@@ -125,7 +133,7 @@ func listAvailableBooks() {
 	}
 }
 
-func listBorrowedBooks() {
+func listborrowedbooks() {
 	var memberID int
 	fmt.Print("Enter member ID: ")
 	fmt.Scan(&memberID)
@@ -139,5 +147,22 @@ func listBorrowedBooks() {
 	fmt.Println("Borrowed Books:")
 	for _, book := range books {
 		fmt.Printf("ID: %d, Title: %s\n", book.ID, book.Title)
+	}
+
+}
+
+func reservebook() {
+	var memberID, bookID int
+
+	fmt.Print("Enter Member ID: ")
+	fmt.Scan(&memberID)
+	fmt.Print("Enter Book ID: ")
+	fmt.Scan(&bookID)
+
+	err := library.ReserveBook(bookID, memberID)
+	if err != nil {
+		fmt.Println("Error:", err)
+	} else {
+		fmt.Println("Book reserved successfully!")
 	}
 }

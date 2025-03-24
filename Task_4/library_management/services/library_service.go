@@ -2,6 +2,8 @@ package services
 
 import (
 	"errors"
+	"sync"
+	"time"
 	"library_management/models"
 )
 
@@ -17,6 +19,8 @@ type LibraryManager interface {
 type Library struct {
 	Books   map[int]models.Book
 	Members map[int]models.Member
+	Reservations map[int]int
+	mu sync.Mutex
 }
 
 func (L *Library) AddBook(book models.Book) {
@@ -31,29 +35,35 @@ func (L *Library) RemoveBook(bookID int) error {
 	return nil
 }
 
+
 func (L *Library) BorrowBook(bookID int, memberID int) error {
+
 	book, bookExists := L.Books[bookID]
 	if !bookExists {
 		return errors.New("book not found")
 	}
+
 
 	member, memberExists := L.Members[memberID]
 	if !memberExists {
 		return errors.New("member not found")
 	}
 
+	
 	if book.Status != "Available" {
 		return errors.New("book is already borrowed")
 	}
 
 	book.Status = "Borrowed"
-	L.Books[bookID] = book
+	L.Books[bookID] = book 
+
 
 	member.BorrowedBooks = append(member.BorrowedBooks, book)
-	L.Members[memberID] = member
+	L.Members[memberID] = member 
 
 	return nil
 }
+
 
 func (L *Library) ReturnBook(bookID int, memberID int) error {
 	book, bookExists := L.Books[bookID]
@@ -99,4 +109,36 @@ func (L *Library) ListBorrowedBooks(memberID int) ([]models.Book, error) {
 		return nil, errors.New("member not found")
 	}
 	return member.BorrowedBooks, nil
+}
+
+func (L *Library) ReserveBook(bookID int, memberID int) error {
+	L.mu.Lock()
+	defer L.mu.Unlock()
+
+	book, exists := L.Books[bookID]
+	if !exists {
+		return errors.New("book not found")
+	}
+
+
+	if _, reserved := L.Reservations[bookID]; reserved {
+		return errors.New("book is already reserved")
+	}
+
+	L.Reservations[bookID] = memberID
+
+	
+	go func() {
+		time.Sleep(5 * time.Second)
+
+		L.mu.Lock()
+		defer L.mu.Unlock()
+
+		
+		if L.Reservations[bookID] == memberID && book.Status == "Available" {
+			delete(L.Reservations, bookID)
+		}
+	}()
+
+	return nil
 }
