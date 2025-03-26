@@ -12,7 +12,7 @@ import (
 	
 )
 
-// Get all tasks
+
 func GetTasks(c *gin.Context) {
 	tasks, err := data.GetAllTasks()
 	if err != nil {

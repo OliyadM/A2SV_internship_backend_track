@@ -15,12 +15,12 @@ func CreateUser(user models.User) error {
 		return errors.New("database not initialized")
 	}
 
-	// Check for existing user
+	
 	if existing, _ := FindUserByUsername(user.Username); existing != nil {
 		return errors.New("username already exists")
 	}
 
-	// Hash password
+	
 	hashed, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return err

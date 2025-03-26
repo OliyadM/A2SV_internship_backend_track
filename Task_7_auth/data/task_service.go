@@ -31,7 +31,7 @@ func ConnectDB() {
 	db := client.Database("task_manager")
 	taskCollection = db.Collection("tasks")
 	userCollection = db.Collection("users")
-	log.Println("✅ Database connected and collections initialized!")
+	log.Println(" Database connected and collections initialized!")
 }
 
 func GetTaskCollection() *mongo.Collection {
